@@ -1,0 +1,56 @@
+/* Reset & Basic Styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f4f400;
+    text-align: center;
+    color: #333;
+  }
+  
+  h1 {
+    background-color: #0b3d91;
+    color: white;
+    padding: 20px 0;
+    margin: 0;
+  }
+  
+  .product {
+    background: rgb(7, 16, 2);
+    max-width: 350px;
+    margin: 40px auto;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .product:hover {
+    transform: scale(1.02);
+  }
+  
+  .product h2 {
+    color: #0b3d91;
+  }
+  
+  .product p {
+    font-size: 18px;
+    margin: 10px 0;
+  }
+  
+  #paypal-button-container {
+    margin-top: 20px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 500px) {
+    .product {
+      width: 90%;
+      margin: 20px auto;
+    }
+  
+    h1 {
+      font-size: 24px;
+    }
+  }
+  

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MDM Sport Store</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background-color: #f8f8f8;
+    }
+    .product, .register {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 25px;
+      border: 2px solid #631b8a;
+      border-radius: 15px;
+      background-color: #fff;
+    }
+    select, input, button, #paypal-button-container {
+      margin-top: 15px;
+      padding: 10px;
+      width: 90%;
+      font-size: 16px;
+    }
+    textarea {
+      width: 90%;
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 16px;
+      resize: vertical;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Welcome to MDM Sport Store</h1>
+
+  <!-- Registration -->
+  <div class="register">
+    <h2>Create Account</h2>
+    <input type="text" id="fullName" placeholder="Full Name" required /><br>
+    <input type="email" id="email" placeholder="Email" required /><br>
+    <input type="password" id="password" placeholder="Password" required /><br>
+    <button onclick="registerUser()">Register</button>
+  </div>
+
+  <!-- Product Selection -->
+  <div class="product">
+    <h2>Select Your Product</h2>
+
+    <label><strong>Category:</strong></label><br>
+    <select id="category">
+      <option value="men">Men</option>
+      <option value="women">Women</option>
+      <option value="youth">Youth</option>
+      <option value="girls">Girls</option>
+    </select>
+
+    <label><strong>Product:</strong></label><br>
+    <select id="productType" onchange="updateOptions()">
+      <option value="tshirt">T-Shirt</option>
+      <option value="hoodie">Hoodie</option>
+      <option value="shoes">Shoes</option>
+      <option value="cap">Cap</option>
+    </select>
+
+    <label><strong>Option:</strong></label><br>
+    <select id="productOption"></select>
+
+    <label><strong>Size:</strong></label><br>
+    <select id="productSize">
+      <option value="S">Small (S)</option>
+      <option value="M">Medium (M)</option>
+      <option value="L">Large (L)</option>
+      <option value="XL">X-Large (XL)</option>
+    </select>
+
+    <label><strong>Shipping Address:</strong></label><br>
+    <textarea id="shippingAddress" placeholder="Street, City, Zip, Country" rows="3"></textarea>
+
+    <label><strong>Shipping Method:</strong></label><br>
+    <select id="shippingMethod">
+      <option value="Free Shipping">Free Shipping - $0.00</option>
+      <option value="Standard Shipping">Standard Shipping - $4.99</option>
+      <option value="Express Shipping">Express Shipping - $9.99</option>
+    </select>
+
+    <label><strong>Payment Method:</strong></label><br>
+    <select id="paymentMethod" onchange="togglePayPal()">
+      <option value="paypal">Pay Now with PayPal</option>
+      <option value="invoice">Pay Later (Invoice)</option>
+    </select>
+
+    <div id="paypal-button-container"></div>
+
+    <div id="invoice-msg" style="display: none; margin-top: 20px; color: green;">
+      You will receive an invoice by email shortly.
+    </div>
+  </div>
+
+  <!-- PayPal SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=USD"></script>
+
+  <script>
+    const productOptions = {
+      tshirt: [
+        { label: 'Small - $19.99', value: '19.99' },
+        { label: 'Medium - $21.99', value: '21.99' },
+        { label: 'Large - $23.99', value: '23.99' }
+      ],
+      hoodie: [
+        { label: 'Medium - $39.99', value: '39.99' },
+        { label: 'Large - $44.99', value: '44.99' }
+      ],
+      shoes: [
+        { label: 'Size 9 - $59.99', value: '59.99' },
+        { label: 'Size 10 - $64.99', value: '64.99' }
+      ],
+      cap: [
+        { label: 'One Size - $14.99', value: '14.99' }
+      ]
+    };
+
+    function updateOptions() {
+      const type = document.getElementById('productType').value;
+      const optionSelect = document.getElementById('productOption');
+      optionSelect.innerHTML = '';
+      productOptions[type].forEach(opt => {
+        const option = document.createElement('option');
+        option.text = opt.label;
+        option.value = opt.value;
+        optionSelect.add(option);
+      });
+    }
+
+    function togglePayPal() {
+      const method = document.getElementById('paymentMethod').value;
+      const paypalBtn = document.getElementById('paypal-button-container');
+      const invoiceMsg = document.getElementById('invoice-msg');
+
+      if (method === 'paypal') {
+        paypalBtn.style.display = 'block';
+        invoiceMsg.style.display = 'none';
+      } else {
+        paypalBtn.style.display = 'none';
+        invoiceMsg.style.display = 'block';
+      }
+    }
+
+    function registerUser() {
+      const name = document.getElementById('fullName').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (name && email && password) {
+        alert("Registration successful for " + name + "!");
+        // Here you'd usually send this data to a backend
+      } else {
+        alert("Please fill out all fields.");
+      }
+    }
+
+    // Initialize product options and PayPal button
+    updateOptions();
+    togglePayPal();
+
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        const price = parseFloat(document.getElementById('productOption').value);
+        const shipping = document.getElementById('shippingMethod').value.includes('Express') ? 9.99 :
+                         document.getElementById('shippingMethod').value.includes('Standard') ? 4.99 : 0;
+        const total = (price + shipping).toFixed(2);
+
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: total }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          const name = details.payer.name.given_name;
+          const address = document.getElementById('shippingAddress').value;
+          alert(`Thank you, ${name}! Your order will be shipped to:\n${address}`);
+        });
+      }
+    }).render('#paypal-button-container');
+  </script>
+
+</body>
+</html>
